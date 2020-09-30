@@ -1,0 +1,60 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>ced23bf2-7b43-4dcf-b575-ca988b00c966</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>gameview.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>Conquid</Name>
+    <RootNamespace>Conquid</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="boardview.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model\move.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="controller.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model\memory.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="gameview.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="model\state.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="model\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="conquidsave.json" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
