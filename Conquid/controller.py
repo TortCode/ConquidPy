@@ -40,6 +40,10 @@ class Controller:
         self.exit_limbo()
         self.cache.undo()
 
+    def revoke(self):
+        self.cache.undo()
+        self.set_confirm(False)
+
     def enter_limbo(self, reversible=True):
         for btn in self.move_btns.values():
             btn['state'] = 'disabled'
@@ -77,8 +81,7 @@ class AcquireHandler:
         board = self.controller.cache.latest
         ply = self.controller.cache.current_player
         if loc in self.locs:
-            self.controller.cache.undo()
-            self.controller.set_confirm(False)
+            self.controller.revoke()
             self.locs.remove(loc)
             for tileloc in self.locs:
                 self.controller.bv[tileloc].recolor(ply, False)
@@ -98,52 +101,27 @@ class ConquerHandler:
         self.controller.cache.receive(Move('C', self.controller.cache.current_player))
         self.controller.set_confirm(True)
         return True
-
     #null
     def handle(self, loc):
         pass
 
 class VanquishHandler:
-    vanquish_surround = [(-1,0), (-1,1), (-1,2), (-1,3),
-                         (4,0), (4,1), (4,2), (4,3),
-                         (0,-1), (1,-1), (2,-1), (3,-1),
-                         (0,4), (1,4), (2,4), (3,4)]
+
     def __init__(self, controller: Controller):
         self.controller = controller
-        self.done = False
     #null
     def propose(self):
-        self.done = False
         return True
 
     def handle(self, corner):
-        if self.done:
-            return
-        board = self.controller.cache.latest
-        player = self.controller.cache.current_player
-        #check that player surrounds square
-        surrounding = 0
-        for dx, dy in VanquishHandler.vanquish_surround:
-            loc = (corner[0] + dx, corner[1] + dy)
-            if board.is_valid_position(loc):
-                cell = board[loc]
-                if not cell.base and cell.player == player:
-                    surrounding += 1
-        if surrounding < 4:
-            return
-        # check that square is filled with enemy
-        square_player = board[corner].player
-        for dx, dy in Board.vanquish_offsets:
-            loc = (corner[0] + dx, corner[1] + dy)
-            if (not board.is_valid_position(loc)):
-                return
-            cell = board[loc]
-            if (cell.base or cell.player != square_player):
-                return
+        self.controller.revoke()
         # send command
-        self.done = True
-        self.controller.cache.receive(Move('V', self.controller.cache.current_player, corner=corner))
-        self.controller.set_confirm(True)
+        try:
+            self.controller.cache.receive(Move('V', self.controller.cache.current_player, corner=corner))
+            self.done = True
+            self.controller.set_confirm(True)
+        except InvalidMove:
+            pass
 
 class ConquestHandler:
 
@@ -153,11 +131,10 @@ class ConquestHandler:
     def propose(self):
         try:
             self.controller.cache.receive(Move('Q', self.controller.cache.current_player))
-            self.controller.set_confirm(True)
-            return True
         except InvalidMove:
             return False
-
+        self.controller.set_confirm(True)
+        return True
     #null
     def handle(self, loc):
         pass

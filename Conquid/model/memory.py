@@ -33,7 +33,7 @@ class Cache:
 
     def receive(self, move: Move):
         if not self.move:
-            move.execute(self.latest)
+            move.execute(self.latest, validate=True)
             self.bv.set_board(self.latest)
             self.move = move
 

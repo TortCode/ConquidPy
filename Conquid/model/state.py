@@ -4,7 +4,7 @@ from heapq import heappush, heappop
 from typing import Dict, List, Tuple
 Position = Tuple[int,int]
 class Cell:
-
+    """stores information about player and base status"""
     def __init__(self):
         self.player = 0
         self.base = False
@@ -20,10 +20,14 @@ class Cell:
         return cpy
 
 class Board:
-    # a representation of the state and logic of the game
+    """a representation of the state of the game and its transformations"""
     adjacent_offsets = [(0,1),(0,-1),(1,0),(-1,0)]
     base_offsets = [(i,j) for i in range(-1,2) for j in range(-1,2)]
     vanquish_offsets = [(i,j) for i in range(4) for j in range(4)]
+    vanquish_surround = [(-1,0), (-1,1), (-1,2), (-1,3),
+                         (4,0), (4,1), (4,2), (4,3),
+                         (0,-1), (1,-1), (2,-1), (3,-1),
+                         (0,4), (1,4), (2,4), (3,4)]
 
     def __init__(self, r, c, bases: Dict[int,Position]):
         self.rows = r
@@ -60,11 +64,15 @@ class Board:
                 if base or not self[loc].base:
                     yield loc
 
-    def acquire(self, player, locs: List[Position]):
+    def acquire(self, player, locs: List[Position], validate=False):
+        if validate:
+            for loc in locs:
+                if self[loc].player != 0:
+                    raise InvalidMove
         for loc in locs:
             self[loc].player = player
 
-    def conquer(self, player):
+    def conquer(self, player, validate=False):
         enemy = 3 - player
         # player cells that touch enemy cell
         touching = [[0 for j in range(self.cols)] for i in range(self.rows)]
@@ -89,12 +97,34 @@ class Board:
                         self[adj].player = player
                         q.append(adj)
 
-    def vanquish(self, player, corner: Position):
+    def vanquish(self, player, corner: Position, validate=False):
+        #check that player surrounds square
+        if validate:
+            surrounding = 0
+            for dx, dy in Board.vanquish_surround:
+                loc = (corner[0] + dx, corner[1] + dy)
+                if self.is_valid_position(loc):
+                    cell = self[loc]
+                    if not cell.base and cell.player == player:
+                        surrounding += 1
+            if surrounding < 4:
+                raise InvalidMove()
+        # check that square is filled with enemy
+        square_player = self[corner].player
+        square = []
         for dx, dy in Board.vanquish_offsets:
             loc = (corner[0] + dx, corner[1] + dy)
-            self[loc].player = 0
+            if validate:
+                if not self.is_valid_position(loc) or \
+                    self[loc].base or \
+                    self[loc].player != square_player:
+                    raise InvalidMove()
+            square.append(self[loc])
+        # delete square
+        for sq in square:
+            sq.player = 0
 
-    def conquest(self, player):
+    def conquest(self, player, validate=False):
         enemy = 3-player
         # distance to player base
         dist = [[math.inf for j in range(self.cols)] for i in range(self.rows)]
@@ -130,7 +160,7 @@ class Board:
         raise InvalidMove()
 
 class Move:
-
+    """A Command representing executable moves on the gameboard"""
     def __init__(self, type, player, **kwargs):
         self.type = type
         self.player = player
@@ -139,7 +169,7 @@ class Move:
         if type == 'V':
             self.corner = kwargs['corner']
 
-    def execute(self, board: Board):
+    def execute(self, board: Board, *, validate):
         if self.type == 'A':
             func = board.acquire
         if self.type == 'C':
@@ -148,7 +178,7 @@ class Move:
             func = board.vanquish
         if self.type == 'Q':
             func = board.conquest
-        func(**{k:v for k,v in self.__dict__.items() if k != 'type'})
+        func(**{k:v for k,v in self.__dict__.items() if k != 'type'}, validate=validate)
 
 class InvalidMove(Exception):
     pass
