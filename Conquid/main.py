@@ -13,6 +13,7 @@ root = tk.Tk()
 root.title("Conquid")
 #make buttom frame
 button_frame = tk.Frame(root)
+turn_box = tk.Label(button_frame,text='player 1', width=10)
 menubar = tk.Menu(root)
 root['menu'] = menubar
 
@@ -24,13 +25,11 @@ menubar.add_cascade(label="File")
 base1 = ((ROWS - 1) // 2, 5)
 base2 = ((ROWS - 1) // 2, COLS - 1 - 5)
 hist = History(ROWS, COLS, {1:base1,2:base2})
-bdv = BoardView(root)
+bdv = BoardView(root, turn_box)
 controller = Controller()
 controller.load_history(hist)
 bdv.link_controller(controller)
 controller.link_boardview(bdv)
-
-
 
 #make buttons
 move_btns = {}
@@ -46,20 +45,26 @@ undo_btn = tk.Button(button_frame, relief='groove', text='undo', width=10, comma
 root.bind('<u>', lambda e: undo_btn.invoke())
 confirm_btn = tk.Button(button_frame,relief='groove', text='confirm', width=10, command=controller.confirm)
 root.bind('<Return>', lambda e: confirm_btn.invoke())
-turn_box = tk.Label(button_frame,text='player 1', width=10)
+
+prev_btn = tk.Button(button_frame,relief='groove', text='<', width=10, command=controller.prev_board)
+next_btn = tk.Button(button_frame,relief='groove', text='>', width=10, command=controller.next_board)
 
 controller.link_buttons(move_btns, undo_btn, confirm_btn, turn_box)
 
 board = controller.cache.latest
 root.geometry(str(board.cols*40)+'x'+str(board.rows*40+30)+'+400+200')
+
 #pack
 button_frame.pack(side='bottom', fill='x')
-move_btns['A'].grid(row=0,column=0)
-move_btns['C'].grid(row=0,column=1)
-move_btns['V'].grid(row=0,column=2)
-move_btns['Q'].grid(row=0,column=3)
-confirm_btn.grid(row=0,column=6)
-turn_box.grid(row=0,column=4)
+move_btns['A'].grid(row=0, column=0)
+move_btns['C'].grid(row=0, column=1)
+move_btns['V'].grid(row=0, column=2)
+move_btns['Q'].grid(row=0, column=3)
+turn_box.grid(row=0, column=4)
 undo_btn.grid(row=0, column=5)
+confirm_btn.grid(row=0, column=6)
+prev_btn.grid(row=0, column=7)
+next_btn.grid(row=0, column=8)
+
 root.focus()
 root.mainloop()

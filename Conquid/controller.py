@@ -41,7 +41,6 @@ class Controller:
         if self.state == 'MOVE_END':
             self.set_state('MOVE_BLANK')
             self.cache.confirm()
-            self.turn_box['text'] = 'player ' + str(self.cache.current_player)
 
     def undo(self):
         self.cache.undo()
@@ -51,8 +50,14 @@ class Controller:
         self.cache.undo()
         self.set_state('MOVE_START')
 
+    def next_board(self):
+        self.cache.play_forward()
+
+    def prev_board(self):
+        self.cache.play_back()
+
     def game_won(self):
-        self.enter_limbo(reversible=False)
+        self.set_state('HIST')
 
     def set_state(self, state: str):
         self.state = state

@@ -55,27 +55,48 @@ class Cache:
         self.hist = history
         self.controller = controller
         self.current_player = 1
+        self.nstate = 0
         self.latest = history.board_history()[0]
         self.save = self.latest.copy()
         self.move = None
 
+    def play_back(self):
+        if self.nstate > 0:
+            self.nstate -= 1
+            self.current_player = 3 - self.current_player
+        self.boardview.set_view(self.boards[self.nstate])
+        self.boardview.set_player(self.current_player)
+
+    def play_forward(self):
+        if self.nstate < len(self.boards)-1:
+            self.nstate += 1
+            self.current_player = 3 - self.current_player
+        self.boardview.set_view(self.boards[self.nstate])
+        self.boardview.set_player(self.current_player)
+        if self.nstate == len(self.boards)-1:
+            self.boardview.set_player(3 - self.current_player, win=True)
+
     def receive(self, move: Move):
         if not self.move:
             move.execute(self.latest, validate=True)
-            self.boardview.set_view(self.latest, self.current_player)
+            self.boardview.set_view(self.latest)
             self.move = move
 
     def undo(self):
         self.latest = self.save.copy()
-        self.boardview.set_view(self.latest, self.current_player)
+        self.boardview.set_view(self.latest)
         self.move = None
 
     def confirm(self):
         if self.move:
             self.save = self.latest.copy()
             self.hist.store(self.move)
+            self.nstate += 1
+            self.current_player = 3 - self.current_player
             if self.move.type == 'Q':
                 self.controller.game_won()
+                self.boards = self.hist.board_history()
+                self.play_forward()
             else:
-                self.current_player = 3 - self.current_player
+                self.boardview.set_player(self.current_player)
             self.move = None

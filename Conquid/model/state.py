@@ -206,7 +206,7 @@ class Move:
         if type == 'V':
             self.corner = corner
 
-    def execute(self, board: Board, *, validate):
+    def execute(self, board: Board, *, validate=False):
         if self.type == 'A':
             func = board.acquire
         if self.type == 'C':

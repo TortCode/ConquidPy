@@ -3,8 +3,9 @@ import tkinter as tk
 
 class BoardView(tk.Frame):
 
-    def __init__(self, master):
+    def __init__(self, master, turn_box):
         super().__init__(master)
+        self.turn_box = turn_box
         self.colors = {0: 'grey96', 1: "#FF6666", 2: "#6666FF"}
         self.basecolors = {1:"#FF2222", 2: "#2222FF"}
 
@@ -22,13 +23,19 @@ class BoardView(tk.Frame):
             for j in range(cols):
                 tile = Tile(self, (i, j))
                 self.tiles[i][j] = tile
-        self.set_view(controller.cache.latest, controller.cache.current_player)
+        self.set_view(controller.cache.latest)
+        self.set_player(controller.cache.current_player)
         self.pack(fill='both', expand=1)
 
     def __getitem__(self, pos: Position):
         return self.tiles[pos[0]][pos[1]]
 
-    def set_view(self, board: Board, ply):
+    def set_player(self, ply, win=False):
+        self.turn_box['text'] = self.turn_box['text'] = 'player ' + str(ply)
+        if win:
+            self.turn_box['text'] += ' WINS!'
+
+    def set_view(self, board: Board):
         for i in range(board.rows):
             for j in range(board.cols):
                 cell = board[(i,j)]
