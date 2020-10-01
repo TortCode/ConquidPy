@@ -75,8 +75,14 @@ class AcquireHandler:
 
     def handle(self, loc):
         board = self.controller.cache.latest
-        if loc not in self.locs and board[loc].player == 0 and len(self.locs) < self.lim:
-            ply = self.controller.cache.current_player
+        ply = self.controller.cache.current_player
+        if loc in self.locs:
+            self.controller.cache.undo()
+            self.controller.set_confirm(False)
+            self.locs.remove(loc)
+            for tileloc in self.locs:
+                self.controller.bv[tileloc].recolor(ply, False)
+        elif board[loc].player == 0 and len(self.locs) < self.lim:
             self.controller.bv[loc].recolor(ply, False)
             self.locs.append(loc)
             if len(self.locs) == self.lim:
