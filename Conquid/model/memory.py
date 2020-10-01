@@ -38,10 +38,9 @@ class Cache:
             self.move = move
 
     def undo(self):
-        if self.move:
-            self.latest = self.save.copy()
-            self.bv.set_board(self.latest)
-            self.move = None
+        self.latest = self.save.copy()
+        self.bv.set_board(self.latest)
+        self.move = None
 
     def confirm(self):
         if self.move:
