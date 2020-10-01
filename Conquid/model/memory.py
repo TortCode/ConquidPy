@@ -52,6 +52,9 @@ class Cache:
         if self.move:
             self.save = self.latest.copy()
             self.hist.store(self.move)
-            self.move = None
-            if self.move.type != 'Q':
+            if self.move.type == 'Q':
+                self.move = None
+                return True
+            else:
                 self.current_player = 3 - self.current_player
+            self.move = None

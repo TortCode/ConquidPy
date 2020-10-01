@@ -1,5 +1,5 @@
 from model.memory import *
-from model.state import Board
+from model.state import InvalidMove, Board
 
 class Controller:
 
@@ -30,21 +30,27 @@ class Controller:
     def confirm(self):
         self.move_attempt = ''
         self.exit_limbo()
-        self.cache.confirm()
-        self.turn_box['text'] = 'player ' + str(self.current_player)
+        if self.cache.confirm():
+            self.enter_limbo(reversible=False)
+        else:
+            self.turn_box['text'] = 'player ' + str(self.cache.current_player)
 
     def undo(self):
         self.move_attempt = ''
         self.exit_limbo()
         self.cache.undo()
 
-    def enter_limbo(self):
+    def enter_limbo(self, reversible=True):
         for btn in self.move_btns.values():
             btn['state'] = 'disabled'
-        self.undo_btn['state'] = 'normal'
+        if reversible:
+            self.undo_btn['state'] = 'normal'
         
-    def allow_confirm(self):
-        self.confirm_btn['state'] = 'normal'
+    def set_confirm(self, allowable):
+        if allowable:
+            self.confirm_btn['state'] = 'normal'
+        else:
+            self.confirm_btn['state'] = 'disabled' 
 
     def exit_limbo(self):
         for btn in self.move_btns.values():
@@ -53,7 +59,8 @@ class Controller:
         self.confirm_btn['state'] = 'disabled'
 
     def tile_click(self, loc):
-        self.handlers[self.move_attempt].handle(loc)
+        if self.move_attempt:
+            self.handlers[self.move_attempt].handle(loc)
 
 class AcquireHandler:
 
@@ -68,16 +75,13 @@ class AcquireHandler:
 
     def handle(self, loc):
         board = self.controller.cache.latest
-        if loc in self.locs:
-            self.controller.bv[loc].recolor(0, False)
-            self.locs.remove(loc)
-        elif board[loc].player == 0 and len(self.locs) < self.lim:
+        if loc not in self.locs and board[loc].player == 0 and len(self.locs) < self.lim:
             ply = self.controller.cache.current_player
             self.controller.bv[loc].recolor(ply, False)
             self.locs.append(loc)
             if len(self.locs) == self.lim:
                 self.controller.cache.receive(Move('A', ply, locs=self.locs))
-                self.controller.allow_confirm()
+                self.controller.set_confirm(True)
 
 class ConquerHandler:
 
@@ -86,7 +90,7 @@ class ConquerHandler:
 
     def propose(self):
         self.controller.cache.receive(Move('C', self.controller.cache.current_player))
-        self.controller.allow_confirm()
+        self.controller.set_confirm(True)
         return True
 
     #null
@@ -100,19 +104,23 @@ class VanquishHandler:
                          (0,4), (1,4), (2,4), (3,4)]
     def __init__(self, controller: Controller):
         self.controller = controller
-
+        self.done = False
     #null
     def propose(self):
+        self.done = False
         return True
 
     def handle(self, corner):
+        if self.done:
+            return
         board = self.controller.cache.latest
+        player = self.controller.cache.current_player
         #check that player surrounds square
         surrounding = 0
         for dx, dy in VanquishHandler.vanquish_surround:
             loc = (corner[0] + dx, corner[1] + dy)
             if board.is_valid_position(loc):
-                cell = self[loc]
+                cell = board[loc]
                 if not cell.base and cell.player == player:
                     surrounding += 1
         if surrounding < 4:
@@ -123,12 +131,13 @@ class VanquishHandler:
             loc = (corner[0] + dx, corner[1] + dy)
             if (not board.is_valid_position(loc)):
                 return
-            cell = self[loc]
+            cell = board[loc]
             if (cell.base or cell.player != square_player):
                 return
         # send command
+        self.done = True
         self.controller.cache.receive(Move('V', self.controller.cache.current_player, corner=corner))
-        self.controller.allow_confirm()
+        self.controller.set_confirm(True)
 
 class ConquestHandler:
 
@@ -138,7 +147,7 @@ class ConquestHandler:
     def propose(self):
         try:
             self.controller.cache.receive(Move('Q', self.controller.cache.current_player))
-            self.controller.allow_confirm()
+            self.controller.set_confirm(True)
             return True
         except InvalidMove:
             return False

@@ -104,8 +104,9 @@ class Board:
         prev = [[None for j in range(self.cols)] for i in range(self.rows)]
 
         i, j = self.bases[player]
+        start = (i,j)
         dist[i][j] = 0
-        pq = [(0, (i,j))]
+        pq = [(0, start)]
 
         while pq:
             # current least-distance cell
@@ -121,7 +122,7 @@ class Board:
                         heappush(pq, (dist[i][j], adj))
                 # trace path if found
                 if self[adj].base and self[adj].player == enemy:
-                    while curr:
+                    while curr != start:
                         self[curr].base = True
                         curr = prev[curr[0]][curr[1]]
                     return
