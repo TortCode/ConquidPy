@@ -48,8 +48,12 @@ class Cache:
         to indicate the game is won by the current player
 
     The BoardView class must have a method with signature
-        BoardView.set_board(self, <board>)
+        BoardView.set_view(self, <board>)
     thru which it receives updated boards to be displayed
+
+    The BoardView class must also have a method with signature
+        BoardView.set_player(self, <player>, win=False)
+    thru which it receives the current player whose turn it is and whether they won yet.
     """
     def __init__(self, history: History, controller: 'Controller'):
         self.hist = history
