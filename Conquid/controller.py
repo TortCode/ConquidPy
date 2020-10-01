@@ -1,12 +1,10 @@
 from model.memory import *
 from model.state import *
+from boardview import BoardView
 
 class Controller:
 
-    def __init__(self, history: History, boardview: BoardView):
-        self.move_attempt = ''
-        self.bv = boardview
-        self.cache = Cache(history, boardview)
+    def __init__(self):
         self.handlers = {}
         self.handlers['A'] = AcquireHandler(self, 3)
         self.handlers['C'] = ConquerHandler(self)
@@ -21,37 +19,61 @@ class Controller:
         confirm['state'] = 'disabled'
         self.turn_box = turnbox
 
+    def load_history(self, history: History):
+        self.move_attempt = ''
+        self.state = 'MOVE_BLANK'
+        self.cache = Cache(history, self)
+
+    def link_boardview(self, boardview: 'Boardview'):
+        self.bv = boardview
+        self.cache.boardview = boardview
+
     def button_pressed(self, action):
-        if self.handlers[action].propose():
-            self.move_attempt = action
-            self.enter_limbo()
-            self.handlers[self.move_attempt].propose()
+        if self.state == 'MOVE_BLANK':
+            if self.handlers[action].propose():
+                self.move_attempt = action
+
+    def tile_click(self, loc):
+        if self.state == 'MOVE_START' or self.state == 'MOVE_END':
+            self.handlers[self.move_attempt].handle(loc)
 
     def confirm(self):
-        self.move_attempt = ''
-        self.exit_limbo()
-        if self.cache.confirm():
-            self.enter_limbo(reversible=False)
-        else:
+        if self.state == 'MOVE_END':
+            self.set_state('MOVE_BLANK')
+            self.cache.confirm()
             self.turn_box['text'] = 'player ' + str(self.cache.current_player)
 
     def undo(self):
-        self.move_attempt = ''
-        self.exit_limbo()
         self.cache.undo()
-
+        self.set_state('MOVE_BLANK')
+        
     def revoke(self):
         self.cache.undo()
-        self.set_confirm(False)
+        self.set_state('MOVE_START')
 
-    def enter_limbo(self, reversible=True):
+    def game_won(self):
+        self.enter_limbo(reversible=False)
+
+    def set_state(self, state: str):
+        self.state = state
+        if state == 'HIST':
+            self.enter_limbo(reversible=False)
+        elif state == 'MOVE_BLANK':
+            self.move_attempt = ''
+            self.exit_limbo()
+        elif state == 'MOVE_START':
+            self.enter_limbo()
+        elif state == 'MOVE_END':
+            self.enter_limbo(confirmable=True)
+
+    def enter_limbo(self, reversible=True, confirmable=False):
         for btn in self.move_btns.values():
             btn['state'] = 'disabled'
         if reversible:
             self.undo_btn['state'] = 'normal'
-        
-    def set_confirm(self, allowable):
-        if allowable:
+        else:
+            self.undo_btn['state'] = 'disabled'
+        if confirmable:
             self.confirm_btn['state'] = 'normal'
         else:
             self.confirm_btn['state'] = 'disabled' 
@@ -62,9 +84,7 @@ class Controller:
         self.undo_btn['state'] = 'disabled'
         self.confirm_btn['state'] = 'disabled'
 
-    def tile_click(self, loc):
-        if self.move_attempt:
-            self.handlers[self.move_attempt].handle(loc)
+    
 
 class AcquireHandler:
 
@@ -75,6 +95,7 @@ class AcquireHandler:
 
     def propose(self):
         self.locs = []
+        self.controller.set_state('MOVE_START')
         return True
 
     def handle(self, loc):
@@ -90,7 +111,7 @@ class AcquireHandler:
             self.locs.append(loc)
             if len(self.locs) == self.lim:
                 self.controller.cache.receive(Move('A', ply, locs=self.locs))
-                self.controller.set_confirm(True)
+                self.controller.set_state('MOVE_END')
 
 class ConquerHandler:
 
@@ -99,7 +120,7 @@ class ConquerHandler:
 
     def propose(self):
         self.controller.cache.receive(Move('C', self.controller.cache.current_player))
-        self.controller.set_confirm(True)
+        self.controller.set_state('MOVE_END')
         return True
     #null
     def handle(self, loc):
@@ -111,6 +132,7 @@ class VanquishHandler:
         self.controller = controller
     #null
     def propose(self):
+        self.controller.set_state('MOVE_START')
         return True
 
     def handle(self, corner):
@@ -118,8 +140,7 @@ class VanquishHandler:
         # send command
         try:
             self.controller.cache.receive(Move('V', self.controller.cache.current_player, corner=corner))
-            self.done = True
-            self.controller.set_confirm(True)
+            self.controller.set_state('MOVE_END')
         except InvalidMove:
             pass
 
@@ -133,7 +154,7 @@ class ConquestHandler:
             self.controller.cache.receive(Move('Q', self.controller.cache.current_player))
         except InvalidMove:
             return False
-        self.controller.set_confirm(True)
+        self.controller.set_state('MOVE_END')
         return True
     #null
     def handle(self, loc):

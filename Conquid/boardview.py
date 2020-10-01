@@ -22,13 +22,13 @@ class BoardView(tk.Frame):
             for j in range(cols):
                 tile = Tile(self, (i, j))
                 self.tiles[i][j] = tile
-        self.set_board(controller.cache.latest)
+        self.set_view(controller.cache.latest, controller.cache.current_player)
         self.pack(fill='both', expand=1)
 
     def __getitem__(self, pos: Position):
         return self.tiles[pos[0]][pos[1]]
 
-    def set_board(self, board: Board):
+    def set_view(self, board: Board, ply):
         for i in range(board.rows):
             for j in range(board.cols):
                 cell = board[(i,j)]

@@ -1,4 +1,3 @@
-from boardview import BoardView
 from model.state import *
 
 class History:
@@ -48,29 +47,27 @@ class Cache:
         If the confirmed move is a valid conquest, confirm method will return a value of True
         to indicate the game is won by the current player
 
-    The cache must be passed an instance of a BoardView class upon construction
-    that represents the view of the game as presented to the player.
     The BoardView class must have a method with signature
         BoardView.set_board(self, <board>)
     thru which it receives updated boards to be displayed
     """
-    def __init__(self, history: History, boardview: BoardView):
+    def __init__(self, history: History, controller: 'Controller'):
         self.hist = history
+        self.controller = controller
         self.current_player = 1
         self.latest = history.board_history()[0]
         self.save = self.latest.copy()
         self.move = None
-        self.bv = boardview
 
     def receive(self, move: Move):
         if not self.move:
             move.execute(self.latest, validate=True)
-            self.bv.set_board(self.latest)
+            self.boardview.set_view(self.latest, self.current_player)
             self.move = move
 
     def undo(self):
         self.latest = self.save.copy()
-        self.bv.set_board(self.latest)
+        self.boardview.set_view(self.latest, self.current_player)
         self.move = None
 
     def confirm(self):
@@ -78,8 +75,7 @@ class Cache:
             self.save = self.latest.copy()
             self.hist.store(self.move)
             if self.move.type == 'Q':
-                self.move = None
-                return True
+                self.controller.game_won()
             else:
                 self.current_player = 3 - self.current_player
             self.move = None
