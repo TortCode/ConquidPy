@@ -1,7 +1,8 @@
-from model import state, memory
+from model.state import *
+from model.memory import *
 from controller import Controller
 import tkinter as tk
-import boardview as bv
+from boardview import BoardView
 import json
 
 
@@ -21,8 +22,8 @@ menubar.add_cascade(label="File")
 
 base1 = ((ROWS - 1) // 2, 5)
 base2 = ((ROWS - 1) // 2, COLS - 1 - 5)
-hist = memory.History(ROWS, COLS, {1:base1,2:base2})
-bdv = bv.BoardView(root)
+hist = History(ROWS, COLS, {1:base1,2:base2})
+bdv = BoardView(root)
 controller = Controller(hist, bdv)
 board = controller.cache.latest
 root.geometry(str(board.cols*40)+'x'+str(board.rows*40+30)+'+400+200')

@@ -1,5 +1,5 @@
 from model.memory import *
-from model.state import InvalidMove, Board
+from model.state import *
 
 class Controller:
 

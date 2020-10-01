@@ -1,5 +1,4 @@
 from model.state import *
-from model.move import *
 import tkinter as tk
 
 class BoardView(tk.Frame):

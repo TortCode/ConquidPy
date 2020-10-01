@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ced23bf2-7b43-4dcf-b575-ca988b00c966</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>gameview.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -25,9 +25,6 @@
     <Compile Include="boardview.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="model\move.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="controller.py">
       <SubType>Code</SubType>
     </Compile>
@@ -37,7 +34,7 @@
     <Compile Include="model\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="gameview.py">
+    <Compile Include="main.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="model\state.py" />

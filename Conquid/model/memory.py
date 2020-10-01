@@ -1,6 +1,5 @@
 from boardview import BoardView
-from model.state import Board
-from model.move import Move
+from model.state import *
 
 class History:
     def __init__(self, rows, cols, bases):
@@ -11,10 +10,6 @@ class History:
 
     def store(self, move):
         self.moves.append(move.__dict__)
-
-    @staticmethod
-    def to_move(dct):
-        return Move(**dct)
 
     def board_history(self):
         # starting state
