@@ -1,15 +1,10 @@
 from model.state import *
 from model.memory import *
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import simpledialog
+from tkinter import filedialog, simpledialog, colorchooser
 from boardview import BoardView
 from controller import Controller
 import json
-
-ROWS = 15
-COLS = 30
-
 
 
 def newcmd():
@@ -44,17 +39,32 @@ def load_history(history):
     bdv.setup(controller, board.rows, board.cols)
     cache.link_gui(controller, bdv)
 
+def set_color(player, base=False):
+    rgb, color = colorchooser.askcolor()
+    if base:
+        bdv.basecolors[player] = color
+    else:
+        bdv.colors[player] = color
+    bdv.set_view(cache.latest)
+
 root = tk.Tk()
 root.title("Conquid")
 root.option_add('*tearOff', False)
 menubar = tk.Menu(root)
 root['menu'] = menubar
-#file menu creation
+# file menu creation
 filemenu = tk.Menu(menubar)
 menubar.add_cascade(menu=filemenu, label="File")
 filemenu.add_command(label='New', command=newcmd)
 filemenu.add_command(label='Open', command=opencmd)
 filemenu.add_command(label='Save As', command=saveascmd)
+# color menu creation
+colormenu = tk.Menu(menubar)
+menubar.add_cascade(menu=colormenu, label="Colors")
+colormenu.add_command(label='Player 1 Base', command=lambda:set_color(1,base=True))
+colormenu.add_command(label='Player 1 Cell', command=lambda:set_color(1))
+colormenu.add_command(label='Player 2 Base', command=lambda:set_color(2,base=True))
+colormenu.add_command(label='Player 2 Cell', command=lambda:set_color(2))
 
 # controller and boardview setup
 button_frame = tk.Frame(root)
@@ -62,7 +72,7 @@ turn_box = tk.Label(button_frame,text='PLAYER 1 TURN', width=15)
 bdv = BoardView(root, turn_box)
 controller = Controller()
 controller.boardview = bdv
-load_history(make_history(ROWS, COLS))
+load_history(make_history(15, 30))
 
 #make buttons
 move_btns = {}
