@@ -15,13 +15,13 @@ class BoardView(tk.Frame):
             self.rowconfigure(i, weight=1)
         for j in range(cols):
             self.columnconfigure(j, weight=1)
+        self.pack(fill='both', expand=1, anchor='center')
         #fill board
         self.tiles = [[None for j in range(cols)] for i in range(rows)]
         for i in range(rows):
             for j in range(cols):
                 tile = Tile(self, controller, (i, j))
                 self.tiles[i][j] = tile
-        self.pack(fill='both', expand=1)
 
     def discard_tiles(self):
         for row in self.tiles:
@@ -49,8 +49,6 @@ class Tile(tk.Button):
     def __init__(self, master: BoardView, controller: 'Controller', loc: Position):
         super().__init__(master, command=lambda:controller.tile_click(loc), overrelief='raised', relief='solid', bd=1)
         self.grid(row=loc[0], column=loc[1], sticky='nsew')
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0,weight=1) 
 
     def recolor(self, player, base):
         self['activebackground'] = self['bg'] = self.master.colors[player]
