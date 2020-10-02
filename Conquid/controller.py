@@ -11,6 +11,8 @@ class Controller:
         self.handlers['C'] = ConquerHandler(self)
         self.handlers['V'] = VanquishHandler(self)
         self.handlers['Q'] = ConquestHandler(self)
+        self.cache = None
+        self.boardview = None
 
     def link_buttons(self, move_btns, undo, confirm, prev, pause_play, next):
         self.move_btns = move_btns
@@ -19,14 +21,7 @@ class Controller:
         self.prev_btn = prev
         self.pauseplay_btn = pause_play
         self.next_btn = next
-        self.set_state('MOVE_BLANK')
-
-    def load_history(self, history: History):
-        self.cache = Cache(history, self)
-
-    def link_boardview(self, boardview: 'Boardview'):
-        self.bv = boardview
-        self.cache.boardview = boardview
+        self.set_state('MOVE_BLANK')     
 
     def button_pressed(self, action):
         if self.state == 'MOVE_BLANK':
@@ -136,9 +131,9 @@ class AcquireHandler:
             self.controller.revoke()
             self.locs.remove(loc)
             for tileloc in self.locs:
-                self.controller.bv[tileloc].recolor(ply, False)
+                self.controller.boardview[tileloc].recolor(ply, False)
         elif board[loc].player == 0 and len(self.locs) < self.lim:
-            self.controller.bv[loc].recolor(ply, False)
+            self.controller.boardview[loc].recolor(ply, False)
             self.locs.append(loc)
             if len(self.locs) == self.lim:
                 self.controller.cache.receive(Move('A', ply, locs=self.locs))

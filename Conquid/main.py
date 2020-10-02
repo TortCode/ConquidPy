@@ -1,35 +1,63 @@
 from model.state import *
 from model.memory import *
 import tkinter as tk
+from tkinter import filedialog
 from boardview import BoardView
 from controller import Controller
 import json
 
-
 ROWS = 15
 COLS = 30
 
+
+
+def newcmd():
+    pass
+def saveascmd():
+    save_file = filedialog.asksaveasfilename()
+    with open(save_file, 'w') as sf:
+        json.dump(cache.hist.__dict__, sf)
+
+def opencmd():
+    open_file = filedialog.askopenfilename()
+    with open(open_file) as of:
+        histdict = json.load(of)
+    bdv.discard_tiles()
+    load_history(History(**histdict))
+
+def make_history(rows, cols):
+    base1 = ((rows - 1) // 2, 5)
+    base2 = ((rows - 1) // 2, cols - 1 - 5)
+    return History(rows, cols, [base1,base2])
+
+def load_history(history):
+    global cache
+    cache = Cache(history)
+    controller.cache = cache
+    board = cache.latest
+    bdv.setup(controller, board.rows, board.cols)
+    cache.link_gui(controller, bdv)
+    root.geometry(str(board.cols*40)+'x'+str(board.rows*40+30)+'+400+200')
+
 root = tk.Tk()
 root.title("Conquid")
-#make buttom frame
-button_frame = tk.Frame(root)
-turn_box = tk.Label(button_frame,text='PLAYER 1 TURN', width=15)
+root.option_add('*tearOff', False)
 menubar = tk.Menu(root)
 root['menu'] = menubar
+#file menu creation
+filemenu = tk.Menu(menubar)
+menubar.add_cascade(menu=filemenu, label="File")
+filemenu.add_command(label='New', command=newcmd)
+filemenu.add_command(label='Open', command=opencmd)
+filemenu.add_command(label='Save As', command=saveascmd)
 
-#file_menu
-menubar.add_cascade(label="File")
-
-
-# set up board
-base1 = ((ROWS - 1) // 2, 5)
-base2 = ((ROWS - 1) // 2, COLS - 1 - 5)
-hist = History(ROWS, COLS, {1:base1,2:base2})
+# controller and boardview setup
+button_frame = tk.Frame(root)
+turn_box = tk.Label(button_frame,text='PLAYER 1 TURN', width=15)
 bdv = BoardView(root, turn_box)
 controller = Controller()
-controller.load_history(hist)
-bdv.link_controller(controller)
-controller.link_boardview(bdv)
+controller.boardview = bdv
+load_history(make_history(ROWS, COLS))
 
 #make buttons
 move_btns = {}
@@ -54,9 +82,6 @@ next_btn = tk.Button(button_frame,relief='groove', text='>>', width=10, command=
 root.bind('<Right>', lambda e: next_btn.invoke())
 
 controller.link_buttons(move_btns, undo_btn, confirm_btn, prev_btn, pause_play, next_btn)
-
-board = controller.cache.latest
-root.geometry(str(board.cols*40)+'x'+str(board.rows*40+30)+'+400+200')
 
 #pack
 button_frame.pack(side='bottom')

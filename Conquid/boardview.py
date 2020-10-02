@@ -9,23 +9,24 @@ class BoardView(tk.Frame):
         self.colors = {0: 'grey96', 1: "#FF6666", 2: "#6666FF"}
         self.basecolors = {1:"#FF2222", 2: "#2222FF"}
 
-    def link_controller(self, controller):
-        self.controller = controller
-        rows = controller.cache.latest.rows
-        cols = controller.cache.latest.cols
-        #make the board
-        self.tiles = [[None for j in range(cols)] for i in range(rows)]
+    def setup(self, controller, rows, cols):
+        #allow expansion to proper dimension
         for i in range(rows):
             self.rowconfigure(i, weight=1)
         for j in range(cols):
             self.columnconfigure(j, weight=1)
+        #fill board
+        self.tiles = [[None for j in range(cols)] for i in range(rows)]
         for i in range(rows):
             for j in range(cols):
-                tile = Tile(self, (i, j))
+                tile = Tile(self, controller, (i, j))
                 self.tiles[i][j] = tile
-        self.set_view(controller.cache.latest)
-        self.set_player(controller.cache.current_player)
         self.pack(fill='both', expand=1)
+
+    def discard_tiles(self):
+        for row in self.tiles:
+            for tile in row:
+                tile.destroy()
 
     def __getitem__(self, pos: Position):
         return self.tiles[pos[0]][pos[1]]
@@ -45,15 +46,14 @@ class BoardView(tk.Frame):
 
 class Tile(tk.Button):
     
-    def __init__(self, master: BoardView, loc: Position):
-        super().__init__(master, command=lambda:master.controller.tile_click(loc), overrelief='raised', relief='solid', bd=1)
+    def __init__(self, master: BoardView, controller: 'Controller', loc: Position):
+        super().__init__(master, command=lambda:controller.tile_click(loc), overrelief='raised', relief='solid', bd=1)
         self.grid(row=loc[0], column=loc[1], sticky='nsew')
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0,weight=1) 
-        self.bv = master
 
     def recolor(self, player, base):
-        self['activebackground'] = self['bg'] = self.bv.colors[player]
+        self['activebackground'] = self['bg'] = self.master.colors[player]
         if base:
-            self['activebackground'] = self['bg']  = self.bv.basecolors[player]
+            self['activebackground'] = self['bg']  = self.master.basecolors[player]
 
