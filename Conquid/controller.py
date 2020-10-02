@@ -54,17 +54,20 @@ class Controller:
         elif self.state == 'MOVE_BLANK':
             self.set_state('HIST')
 
+    def check_prevnext(self):
+        self.prev_btn['state'] = 'disabled' if self.cache.at_first_state() else 'normal'
+        self.next_btn['state'] = 'disabled' if self.cache.at_last_state() else 'normal'
+        self.pauseplay_btn['state'] = 'normal' if self.cache.at_last_state(finish_allowed=False) else 'disabled'
+
     def next_board(self):
         if self.state == 'HIST':
             self.cache.play_forward()
-            if self.cache.at_last_state(finish_allowed=False):
-                self.pauseplay_btn['state'] = 'normal'
+            self.check_prevnext()
 
     def prev_board(self):
         if self.state == 'HIST':
             self.cache.play_back()
-            if not self.cache.at_last_state(finish_allowed=False):
-                self.pauseplay_btn['state'] = 'disabled'
+            self.check_prevnext()
 
     def game_won(self):
         self.set_state('HIST')
@@ -75,8 +78,7 @@ class Controller:
         self.state = state
         if state == 'HIST':
             self.enter_limbo(reversible=False)
-            self.prev_btn['state'] = 'normal'
-            self.next_btn['state'] = 'normal'
+            self.check_prevnext()
             self.pauseplay_btn['text'] = 'play'
         else:
             self.prev_btn['state'] = 'disabled'

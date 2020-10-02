@@ -77,6 +77,9 @@ class Cache:
         return self.nstate == len(self.save)-1 and \
             (finish_allowed or not self.hist.is_finished())
 
+    def at_first_state(self):
+        return self.nstate == 0
+
     def play_back(self):
         if self.nstate > 0:
             self.nstate -= 1
