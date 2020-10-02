@@ -46,16 +46,20 @@ root.bind('<u>', lambda e: undo_btn.invoke())
 confirm_btn = tk.Button(button_frame,relief='groove', text='confirm', width=10, command=controller.confirm)
 root.bind('<Return>', lambda e: confirm_btn.invoke())
 
-prev_btn = tk.Button(button_frame,relief='groove', text='<', width=10, command=controller.prev_board)
-next_btn = tk.Button(button_frame,relief='groove', text='>', width=10, command=controller.next_board)
+prev_btn = tk.Button(button_frame,relief='groove', text='<<', width=10, command=controller.prev_board)
+root.bind('<Left>', lambda e: prev_btn.invoke())
+pause_play = tk.Button(button_frame,relief='groove', text='#', width=10, command=controller.pauseplay)
+root.bind('<Up>', lambda e: pause_play.invoke())
+next_btn = tk.Button(button_frame,relief='groove', text='>>', width=10, command=controller.next_board)
+root.bind('<Right>', lambda e: next_btn.invoke())
 
-controller.link_buttons(move_btns, undo_btn, confirm_btn, turn_box)
+controller.link_buttons(move_btns, undo_btn, confirm_btn, prev_btn, pause_play, next_btn)
 
 board = controller.cache.latest
 root.geometry(str(board.cols*40)+'x'+str(board.rows*40+30)+'+400+200')
 
 #pack
-button_frame.pack(side='bottom', fill='x')
+button_frame.pack(side='bottom')
 move_btns['A'].grid(row=0, column=0)
 move_btns['C'].grid(row=0, column=1)
 move_btns['V'].grid(row=0, column=2)
@@ -64,7 +68,8 @@ turn_box.grid(row=0, column=4)
 undo_btn.grid(row=0, column=5)
 confirm_btn.grid(row=0, column=6)
 prev_btn.grid(row=0, column=7)
-next_btn.grid(row=0, column=8)
+pause_play.grid(row=0,column=8)
+next_btn.grid(row=0, column=9)
 
 root.focus()
 root.mainloop()

@@ -11,17 +11,16 @@ class Controller:
         self.handlers['V'] = VanquishHandler(self)
         self.handlers['Q'] = ConquestHandler(self)
 
-    def link_buttons(self, move_btns, undo, confirm, turnbox):
+    def link_buttons(self, move_btns, undo, confirm, prev, pause_play, next):
         self.move_btns = move_btns
         self.undo_btn = undo
-        undo['state'] = 'disabled'
         self.confirm_btn = confirm
-        confirm['state'] = 'disabled'
-        self.turn_box = turnbox
+        self.prev_btn = prev
+        self.pauseplay_btn = pause_play
+        self.next_btn = next
+        self.set_state('MOVE_BLANK')
 
     def load_history(self, history: History):
-        self.move_attempt = ''
-        self.state = 'MOVE_BLANK'
         self.cache = Cache(history, self)
 
     def link_boardview(self, boardview: 'Boardview'):
@@ -43,27 +42,50 @@ class Controller:
             self.cache.confirm()
 
     def undo(self):
-        self.cache.undo()
+        """Reverts move and deselects move type"""
+        self.cache.discard_change()
         self.set_state('MOVE_BLANK')
         
     def revoke(self):
-        self.cache.undo()
+        """Reverts move but keeps move type"""
+        self.cache.discard_change()
         self.set_state('MOVE_START')
 
+    def pauseplay(self):
+        if self.state == 'HIST' and \
+            self.cache.at_last_state(finish_allowed=False):
+            self.set_state('MOVE_BLANK')
+        elif self.state == 'MOVE_BLANK':
+            self.set_state('HIST')
+
     def next_board(self):
-        self.cache.play_forward()
+        if self.state == 'HIST':
+            self.cache.play_forward()
+            if self.cache.at_last_state(finish_allowed=False):
+                self.pauseplay_btn['state'] = 'normal'
 
     def prev_board(self):
-        self.cache.play_back()
+        if self.state == 'HIST':
+            self.cache.play_back()
+            if not self.cache.at_last_state(finish_allowed=False):
+                self.pauseplay_btn['state'] = 'disabled'
 
     def game_won(self):
         self.set_state('HIST')
+        self.pauseplay_btn['state'] = 'disabled'
 
     def set_state(self, state: str):
         self.state = state
         if state == 'HIST':
             self.enter_limbo(reversible=False)
-        elif state == 'MOVE_BLANK':
+            self.prev_btn['state'] = 'normal'
+            self.next_btn['state'] = 'normal'
+            self.pauseplay_btn['text'] = 'play'
+        else:
+            self.prev_btn['state'] = 'disabled'
+            self.next_btn['state'] = 'disabled'
+            self.pauseplay_btn['text'] = 'pause'
+        if state == 'MOVE_BLANK':
             self.move_attempt = ''
             self.exit_limbo()
         elif state == 'MOVE_START':
@@ -76,16 +98,18 @@ class Controller:
             btn['state'] = 'disabled'
         if reversible:
             self.undo_btn['state'] = 'normal'
+            self.pauseplay_btn['state'] = 'disabled'
+            if confirmable:
+                self.confirm_btn['state'] = 'normal'
         else:
+            self.pauseplay_btn['state'] = 'normal'
             self.undo_btn['state'] = 'disabled'
-        if confirmable:
-            self.confirm_btn['state'] = 'normal'
-        else:
             self.confirm_btn['state'] = 'disabled' 
 
     def exit_limbo(self):
         for btn in self.move_btns.values():
             btn['state'] = 'normal'
+        self.pauseplay_btn['state'] = 'normal'
         self.undo_btn['state'] = 'disabled'
         self.confirm_btn['state'] = 'disabled'
 
