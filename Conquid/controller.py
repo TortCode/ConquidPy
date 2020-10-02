@@ -1,6 +1,7 @@
 from model.memory import *
 from model.state import *
 from boardview import BoardView
+from tkinter import messagebox
 
 class Controller:
 
@@ -72,6 +73,7 @@ class Controller:
 
     def game_won(self):
         self.set_state('HIST')
+        messagebox.showinfo(message= f'PLAYER {3 - self.cache.current_player} WINS!')
         self.pauseplay_btn['state'] = 'disabled'
 
     def set_state(self, state: str):

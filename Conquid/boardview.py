@@ -31,9 +31,11 @@ class BoardView(tk.Frame):
         return self.tiles[pos[0]][pos[1]]
 
     def set_player(self, ply, win=False):
-        self.turn_box['text'] = self.turn_box['text'] = 'player ' + str(ply)
+        self.turn_box['text'] = self.turn_box['text'] = 'PLAYER ' + str(ply)
         if win:
             self.turn_box['text'] += ' WINS!'
+        else:
+            self.turn_box['text'] += ' TURN'
 
     def set_view(self, board: Board):
         for i in range(board.rows):

@@ -13,7 +13,7 @@ root = tk.Tk()
 root.title("Conquid")
 #make buttom frame
 button_frame = tk.Frame(root)
-turn_box = tk.Label(button_frame,text='player 1', width=10)
+turn_box = tk.Label(button_frame,text='PLAYER 1 TURN', width=15)
 menubar = tk.Menu(root)
 root['menu'] = menubar
 
@@ -67,9 +67,9 @@ move_btns['Q'].grid(row=0, column=3)
 turn_box.grid(row=0, column=4)
 undo_btn.grid(row=0, column=5)
 confirm_btn.grid(row=0, column=6)
-prev_btn.grid(row=0, column=7)
-pause_play.grid(row=0,column=8)
-next_btn.grid(row=0, column=9)
+prev_btn.grid(row=0, column=7, ipadx = 5)
+pause_play.grid(row=0,column=8, ipadx = 5)
+next_btn.grid(row=0, column=9, ipadx = 5)
 
 root.focus()
 root.mainloop()
