@@ -1,7 +1,7 @@
 import math
 from collections import deque
 from heapq import heappush, heappop
-from typing import Dict, List, Tuple
+from typing import Tuple
 Position = Tuple[int,int]
 
 class Cell:
@@ -48,7 +48,7 @@ class Board:
                          (0,-1), (1,-1), (2,-1), (3,-1),
                          (0,4), (1,4), (2,4), (3,4)]
 
-    def __init__(self, r, c, bases: Dict[int,Position]):
+    def __init__(self, r, c, bases: [Position]):
         self.rows = r
         self.cols = c
         self.grid = [[Cell() for j in range(c)] for i in range(r)]
@@ -83,7 +83,7 @@ class Board:
                 if base or not self[loc].base:
                     yield loc
 
-    def acquire(self, player, locs: List[Position], validate=False):
+    def acquire(self, player, locs: [Position], validate=False):
         if validate:
             for loc in locs:
                 if self[loc].player != 0:
