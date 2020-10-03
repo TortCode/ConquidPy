@@ -32,7 +32,7 @@ class History:
         # update boards with moves to generate list
         boards = [board.copy()]
         for mv in self.moves:
-            Move(**mv).execute(board)
+            Move(**mv)(board)
             boards.append(board.copy())
         return boards
 
@@ -99,7 +99,7 @@ class Cache:
     def receive(self, move: Move):
         if self.move:
             return
-        move.execute(self.latest, validate=True)
+        move(self.latest, validate=True)
         self.boardview.set_view(self.latest)
         self.move = move
 

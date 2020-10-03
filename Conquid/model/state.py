@@ -2,6 +2,7 @@ import math
 from collections import deque
 from heapq import heappush, heappop
 from typing import Tuple
+from functools import partial
 Position = Tuple[int,int]
 
 class Cell:
@@ -91,7 +92,7 @@ class Board:
         for loc in locs:
             self[loc].player = player
 
-    def conquer(self, player, validate=False):
+    def conquer(self, player):
         enemy = 3 - player
         # player cells that touch enemy cell
         touching = [[0 for j in range(self.cols)] for i in range(self.rows)]
@@ -143,7 +144,7 @@ class Board:
         for sq in square:
             sq.player = 0
 
-    def conquest(self, player, validate=False):
+    def conquest(self, player):
         enemy = 3-player
         # distance to player base
         dist = [[math.inf for j in range(self.cols)] for i in range(self.rows)]
@@ -206,16 +207,16 @@ class Move:
         if type == 'V':
             self.corner = corner
 
-    def execute(self, board: Board, *, validate=False):
+    def __call__(self, board: Board, *, validate=False):
         if self.type == 'A':
-            func = board.acquire
+            func = partial(board.acquire, validate=validate)
         if self.type == 'C':
             func = board.conquer
         if self.type == 'V':
-            func = board.vanquish
+            func = partial(board.vanquish, validate=validate)
         if self.type == 'Q':
             func = board.conquest
-        func(**{k:v for k,v in self.__dict__.items() if k != 'type'}, validate=validate)
+        func(**{k:v for k,v in self.__dict__.items() if k != 'type'})
 
 class InvalidMove(Exception):
     pass
