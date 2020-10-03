@@ -2,6 +2,16 @@ from model.memory import *
 from model.state import *
 from boardview import BoardView
 from tkinter import messagebox
+from functools import wraps
+
+def in_state(*states):
+    def decorator(func):
+        @wraps(func)
+        def newfunc(self, *args, **kwargs):
+            if self.state in states:
+                func(self, *args, **kwargs)
+        return newfunc
+    return decorator
 
 class Controller:
 
@@ -23,19 +33,19 @@ class Controller:
         self.next_btn = next
         self.set_state('MOVE_BLANK')     
 
+    @in_state('MOVE_BLANK')
     def button_pressed(self, action):
-        if self.state == 'MOVE_BLANK':
-            if self.handlers[action].propose():
-                self.move_attempt = action
-
+        if self.handlers[action].propose():
+            self.move_attempt = action
+    
+    @in_state('MOVE_START', 'MOVE_END')
     def tile_click(self, loc):
-        if self.state == 'MOVE_START' or self.state == 'MOVE_END':
-            self.handlers[self.move_attempt].handle(loc)
+        self.handlers[self.move_attempt].handle(loc)
 
+    @in_state('MOVE_END')
     def confirm(self):
-        if self.state == 'MOVE_END':
-            self.set_state('MOVE_BLANK')
-            self.cache.confirm()
+        self.set_state('MOVE_BLANK')
+        self.cache.confirm()
 
     def undo(self):
         """Reverts move and deselects move type"""
@@ -59,15 +69,15 @@ class Controller:
         self.next_btn['state'] = 'disabled' if self.cache.at_last_state() else 'normal'
         self.pauseplay_btn['state'] = 'normal' if self.cache.at_last_state(finish_allowed=False) else 'disabled'
 
+    @in_state('HIST')
     def next_board(self):
-        if self.state == 'HIST':
-            self.cache.play_forward()
-            self.check_prevnext()
+        self.cache.play_forward()
+        self.check_prevnext()
 
+    @in_state('HIST')
     def prev_board(self):
-        if self.state == 'HIST':
-            self.cache.play_back()
-            self.check_prevnext()
+        self.cache.play_back()
+        self.check_prevnext()
 
     def game_won(self):
         self.set_state('HIST')
