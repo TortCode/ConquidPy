@@ -33,15 +33,12 @@ class BoardView(tk.Frame):
 
     def set_player(self, ply, win=False):
         self.turn_box['text'] = self.turn_box['text'] = 'PLAYER ' + str(ply)
-        if win:
-            self.turn_box['text'] += ' WINS!'
-        else:
-            self.turn_box['text'] += ' TURN'
+        self.turn_box['text'] += ' WINS!' if win else ' TURN'
 
     def set_view(self, board: Board):
         for i in range(board.rows):
             for j in range(board.cols):
-                cell = board[(i,j)]
+                cell = board[i,j]
                 self.tiles[i][j].recolor(cell.player, cell.base)
 
 class Tile(tk.Button):

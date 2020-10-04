@@ -15,19 +15,16 @@ class Cell:
     base = False if its a normal gameplay cell or it is the center of the base
     base = True if its in the 8 cell ring of the base surrounding the center
     """
-    def __init__(self):
-        self.player = 0
-        self.base = False
+    def __init__(self, player=0, base=False):
+        self.player = player
+        self.base = base
 
     def set_base(self, player):
         self.player = player
         self.base = True
 
     def copy(self):
-        cpy = Cell()
-        cpy.player = self.player
-        cpy.base = self.base
-        return cpy
+        return Cell(**self.__dict__)
 
 class Board:
     """
@@ -61,18 +58,21 @@ class Board:
     def make_base(self, player):
         center = self.bases[player-1]
         for dx, dy in Board.base_offsets:
-            self[(center[0] + dx, center[1] + dy)].set_base(player)
+            self[center[0] + dx, center[1] + dy].set_base(player)
         self[center].base = False
 
     def copy(self):
         cpy = Board(self.rows, self.cols, self.bases)
         for i in range(self.rows):
             for j in range(self.cols):
-                cpy.grid[i][j] = self.grid[i][j].copy()
+                cpy[i,j] = self[i,j].copy()
         return cpy
 
     def __getitem__(self, pos: Position) -> Cell:
         return self.grid[pos[0]][pos[1]]
+
+    def __setitem__(self, pos: Position, value) -> Cell:
+        self.grid[pos[0]][pos[1]] = value
 
     def is_valid_position(self, pos: Position):
         return pos[0] >= 0 and pos[0] < self.rows and pos[1] >= 0 and pos[1] < self.cols
@@ -97,25 +97,20 @@ class Board:
         # player cells that touch enemy cell
         touching = [[0 for j in range(self.cols)] for i in range(self.rows)]
         # fill queue w player cells
-        q = deque()
-        for i in range(self.rows):
-            for j in range(self.cols):
-                loc = (i,j)
-                if self[loc].player == player and not self[loc].base:
-                    q.append(loc)
+        q = deque((i,j) for i in range(self.rows) for j in range(self.cols) \
+            if self[i,j].player == player and not self[i,j].base)
         # begin teh konker
         while q:
             # newly conquered cell
             curr = q.popleft()
             for i, j in self.adjacent(curr):
-                adj = (i,j)
                 # update neighbour
-                if self[adj].player == enemy:
+                if self[i, j].player == enemy:
                     touching[i][j] += 1
                     if touching[i][j] >= 2:
                         #conquer neighbour
-                        self[adj].player = player
-                        q.append(adj)
+                        self[i, j].player = player
+                        q.append((i,j))
 
     def vanquish(self, player, corner: Position, validate=False):
         #check that player surrounds square
@@ -163,15 +158,14 @@ class Board:
             pathlen, curr = heappop(pq)
             visited[curr[0]][curr[1]] = True
             for i, j in self.adjacent(curr, base=True):
-                adj = (i, j)
-                if not visited[i][j] and self[adj].player == player:
+                if not visited[i][j] and self[i, j].player == player:
                     #update unvisited neighbours for shorter path
                     if dist[i][j] > pathlen + 1:
                         prev[i][j] = curr
                         dist[i][j] = pathlen + 1
-                        heappush(pq, (dist[i][j], adj))
+                        heappush(pq, (dist[i][j], (i, j)))
                 # trace path if found
-                if self[adj].base and self[adj].player == enemy:
+                if self[i, j].base and self[i, j].player == enemy:
                     while curr != start:
                         self[curr].base = True
                         curr = prev[curr[0]][curr[1]]
