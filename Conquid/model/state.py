@@ -71,7 +71,7 @@ class Board:
     def __getitem__(self, pos: Position) -> Cell:
         return self.grid[pos[0]][pos[1]]
 
-    def __setitem__(self, pos: Position, value) -> Cell:
+    def __setitem__(self, pos: Position, value):
         self.grid[pos[0]][pos[1]] = value
 
     def is_valid_position(self, pos: Position):
@@ -202,15 +202,17 @@ class Move:
             self.corner = corner
 
     def __call__(self, board: Board, *, validate=False):
+        b = board.copy()
         if self.type == 'A':
-            func = partial(board.acquire, validate=validate)
+            func = partial(b.acquire, validate=validate)
         if self.type == 'C':
-            func = board.conquer
+            func = b.conquer
         if self.type == 'V':
-            func = partial(board.vanquish, validate=validate)
+            func = partial(b.vanquish, validate=validate)
         if self.type == 'Q':
-            func = board.conquest
+            func = b.conquest
         func(**{k:v for k,v in self.__dict__.items() if k != 'type'})
+        return b
 
 class InvalidMove(Exception):
     pass

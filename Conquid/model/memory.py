@@ -1,4 +1,5 @@
 from model.state import *
+from itertools import accumulate
 
 class History:
     """
@@ -28,12 +29,9 @@ class History:
 
     def board_history(self):
         # starting state
-        board = Board(self.rows, self.cols, self.bases)
-        # update boards with moves to generate list
-        boards = [board.copy()]
+        boards = [Board(self.rows, self.cols, self.bases)]
         for mv in self.moves:
-            Move(**mv)(board)
-            boards.append(board.copy())
+            boards.append(Move(**mv)(boards[-1]))
         return boards
 
 class Cache:
@@ -60,10 +58,9 @@ class Cache:
     """
     def __init__(self, history: History):
         self.hist = history
-        self.current_player = 1
-        self.nstate = 0
         self.save = history.board_history()
         self.nstate = len(self.save) - 1
+        self.current_player = self.nstate % 2 + 1
         self.latest = self.save[-1].copy()
         self.move = None 
 
@@ -71,7 +68,7 @@ class Cache:
         self.controller = controller
         self.boardview = boardview
         boardview.set_view(self.latest)
-        boardview.set_player(self.current_player)
+        self.send_turn_status()
 
     def at_last_state(self, finish_allowed=True):
         return self.nstate == len(self.save)-1 and \
@@ -80,44 +77,46 @@ class Cache:
     def at_first_state(self):
         return self.nstate == 0
 
+    def send_turn_status(self):
+        if self.at_last_state() and self.hist.is_finished():
+            self.boardview.set_player(3 - self.current_player, win=True)
+        else:
+            self.boardview.set_player(self.current_player)
+
     def play_back(self):
         if self.nstate > 0:
             self.nstate -= 1
             self.current_player = 3 - self.current_player
         self.boardview.set_view(self.save[self.nstate])
-        self.boardview.set_player(self.current_player)
+        self.send_turn_status()
 
     def play_forward(self):
         if self.nstate < len(self.save)-1:
             self.nstate += 1
             self.current_player = 3 - self.current_player
         self.boardview.set_view(self.save[self.nstate])
-        self.boardview.set_player(self.current_player)
-        if self.at_last_state() and self.hist.is_finished():
-            self.boardview.set_player(3 - self.current_player, win=True)
+        self.send_turn_status()
 
     def receive(self, move: Move):
         if self.move:
             return
-        move(self.latest, validate=True)
+        self.latest = move(self.latest, validate=True)
         self.boardview.set_view(self.latest)
         self.move = move
 
     def discard_change(self):
-        self.latest = self.save[-1].copy()
+        self.latest = self.save[-1]
         self.boardview.set_view(self.latest)
         self.move = None
 
     def confirm(self):
         if not self.move:
             return
-        self.save.append(self.latest.copy())
+        self.save.append(self.latest)
         self.hist.store(self.move)
         self.nstate += 1
         self.current_player = 3 - self.current_player
         if self.move.type == 'Q':
             self.controller.game_won()
-            self.play_forward()
-        else:
-            self.boardview.set_player(self.current_player)
+        self.send_turn_status()
         self.move = None
