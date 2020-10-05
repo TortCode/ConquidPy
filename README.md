@@ -57,4 +57,4 @@ A cell is said to *surround* a 4 by 4 block if it is *adjacent* to a cell within
 A *path* of cells is a list of cells where each cell is *adjacent* to the cell that comes directly before and the cell that comes directly after it.
 ## Winning
 The first player to perform a Conquest wins the game and ends the match.
-Ceremonially, one of the paths of the winning player will be colored with that player's base color.
+Ceremonially, one of the winning paths of the winning player will be colored with that player's base color.
