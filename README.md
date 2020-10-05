@@ -49,8 +49,11 @@ This is only possible if the said 4 by 4 block is *surrounded* by at least four 
 If there exists a *path* connecting a cell *adjacent* to your base with a cell *adjacent* to your opponent's base
 that consists of only your cells, you may declare Conquest.
 #### Definition of Terms
+##### Adjacent
 A cell is *adjacent* to another cell if they share an edge. Since cells that touch diagonally only share a corner, they are not adjacent to each other.
+##### Surround
 A cell is said to *surround* a 4 by 4 block if it is *adjacent* to a cell within the block, but is not itself within the block.
+##### Path
 A *path* of cells is a list of cells where each cell is *adjacent* to the cell that comes directly before and the cell that comes directly after it.
 ## Winning
 The first player to perform a Conquest wins the game and ends the match.
