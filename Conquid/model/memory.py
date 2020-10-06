@@ -12,11 +12,11 @@ class History:
     ***Remember, if a board is the (i)th state in the board history,
     then the last move done is the (i-1)th action in the move history
     """
-    def __init__(self, rows, cols, bases, moves):
+    def __init__(self, rows, cols, base_size, moves=None):
         self.rows = rows
         self.cols = cols
-        self.bases = bases
-        self.moves = moves
+        self.base_size = base_size
+        self.moves = moves if moves else []
 
     def store(self, move):
         self.moves.append(move.__dict__)
@@ -29,7 +29,7 @@ class History:
 
     def board_history(self):
         # starting state
-        boards = [Board(self.rows, self.cols, self.bases)]
+        boards = [Board(self.rows, self.cols, self.base_size)]
         for mv in self.moves:
             boards.append(Move(**mv)(boards[-1]))
         return boards

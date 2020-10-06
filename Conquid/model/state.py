@@ -39,30 +39,39 @@ class Board:
        and the second coordinate may range from 0 to cols - 1
     """
     adjacent_offsets = [(0,1),(0,-1),(1,0),(-1,0)]
-    base_offsets = [(i,j) for i in range(-1,2) for j in range(-1,2)]
     vanquish_offsets = [(i,j) for i in range(4) for j in range(4)]
+    base_offsets3x3 = [(i,j) for i in range(-1,2) for j in range(-1,2)]
+    base_offsets2x2 = [(0,0),(0,1),(1,0),(1,1)]
     vanquish_surround = [(-1,0), (-1,1), (-1,2), (-1,3),
                          (4,0), (4,1), (4,2), (4,3),
                          (0,-1), (1,-1), (2,-1), (3,-1),
                          (0,4), (1,4), (2,4), (3,4)]
 
-    def __init__(self, r, c, bases: [Position]):
+    def __init__(self, r, c, base_size):
         self.rows = r
         self.cols = c
         self.grid = [[Cell() for j in range(c)] for i in range(r)]
-        self.bases = bases
+        self.base_size = base_size
+        if base_size == 2:
+            self.bases = ((self.rows // 2 - 1, 4), (self.rows // 2 - 1, self.cols - 6))
+            self.make_base2x2()
+        elif base_size == 3:
+            self.bases = ((self.rows // 2, 5), (self.rows // 2, self.cols - 6))
+            self.make_base3x3()
 
-        self.make_base(1)
-        self.make_base(2)
+    def make_base3x3(self):
+        for player, center in enumerate(self.bases, 1):
+            for dx, dy in Board.base_offsets3x3:
+                self[center[0] + dx, center[1] + dy].set_base(player)
+            self[center].base = False
 
-    def make_base(self, player):
-        center = self.bases[player-1]
-        for dx, dy in Board.base_offsets:
-            self[center[0] + dx, center[1] + dy].set_base(player)
-        self[center].base = False
+    def make_base2x2(self):
+        for player, corner in enumerate(self.bases, 1):
+            for dx, dy in Board.base_offsets2x2:
+                self[corner[0] + dx, corner[1] + dy].set_base(player)
 
     def copy(self):
-        cpy = Board(self.rows, self.cols, self.bases)
+        cpy = Board(self.rows, self.cols, self.base_size)
         for i in range(self.rows):
             for j in range(self.cols):
                 cpy[i,j] = self[i,j].copy()

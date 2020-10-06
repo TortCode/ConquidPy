@@ -10,8 +10,9 @@ import json
 def newcmd():
     rows = simpledialog.askinteger('Input', 'How many rows?', minvalue=3, parent=root)
     cols = simpledialog.askinteger('Input', 'How many columns?', minvalue=14, parent=root)
+    sz = 3 if rows % 2 else 2
     bdv.discard_tiles()
-    load_history(make_history(rows,cols))
+    load_history(History(rows, cols, sz))
 #save current game
 def saveascmd():
     save_file = filedialog.asksaveasfilename()
@@ -24,11 +25,6 @@ def opencmd():
         histdict = json.load(of)
     bdv.discard_tiles()
     load_history(History(**histdict))
-
-def make_history(rows, cols):
-    base1 = ((rows - 1) // 2, 5)
-    base2 = ((rows - 1) // 2, cols - 1 - 5)
-    return History(rows, cols, [base1,base2], [])
 
 def load_history(history):
     global cache
@@ -72,7 +68,7 @@ turn_box = tk.Label(button_frame,text='PLAYER 1 TURN', width=15)
 bdv = BoardView(root, turn_box)
 controller = Controller()
 controller.boardview = bdv
-load_history(make_history(15, 30))
+load_history(History(14, 28, 2))
 
 #move buttons
 move_btns = {}
