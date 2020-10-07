@@ -2,6 +2,18 @@
 A Python port in Tkinter of a grid-based game created by @Pqvqn
 
 ## Controls
+### Game Controls
+#### Acquire <A>
+#### Conquer <C>
+#### Vanquish <V>
+#### Conquest <Q>
+#### Undo <U>
+#### Confirm <Return>
+### Playback Controls
+#### Previous(<<) <LArrow>
+#### Play/Pause <UArrow>
+#### Next(>>) <RArrow>
+
 ## Game Customization
 ## Saving and Loading Files
 
