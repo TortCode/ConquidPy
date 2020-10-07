@@ -2,17 +2,29 @@
 A Python port in Tkinter of a grid-based game created by @Pqvqn
 
 ## Controls
-### Game Controls
-#### Acquire <A>
-#### Conquer <C>
-#### Vanquish <V>
-#### Conquest <Q>
-#### Undo <U>
-#### Confirm <Return>
+### Gameplay Controls
+#### Acquire \<A>
+Allows you to select and deselect cells to acquire
+and preview an acquire move.
+#### Conquer \<C>
+Previews a conquer move.
+#### Vanquish \<V>
+Allows you to select the top-left corner of the vanquish block
+and preview a vanquish move.
+#### Conquest \<Q>
+Preview a conquest move if possible.
+#### Undo \<U>
+Reset the prior move buttons to allow you to switch your type of move.
+#### Confirm \<Return>
+Confirm the move entered in and advance to next player.
 ### Playback Controls
-#### Previous(<<) <LArrow>
-#### Play/Pause <UArrow>
-#### Next(>>) <RArrow>
+#### Previous(<<) \<LArrow>
+See previous board state.
+#### Play/Pause \<UArrow>
+Switches between gameplay and playback mode when no moves are selected.
+When a game is finished, only playback mode is allowed.
+#### Next(>>) \<RArrow>
+See next board state.
 
 ## Game Customization
 ## Saving and Loading Files
