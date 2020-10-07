@@ -79,6 +79,8 @@ A cell is *adjacent* to another cell if they share an edge. Since cells that tou
 A cell is said to *surround* a 4 by 4 block if it is *adjacent* to a cell within the block, but is not itself within the block.
 ##### Path
 A *path* of cells is a list of cells where each cell is *adjacent* to the cell that comes directly before and the cell that comes directly after it.
+#### Unplayability of Bases
+No cell contained within a base is considered valid for the purposes of conquering enemy cells, forming part of a vanquish block, or surrounding a vanquish block.
 ## Winning
 The first player to perform a Conquest wins the game and ends the match.
 Ceremonially, one of the winning paths of the winning player will be colored with that player's base color.
