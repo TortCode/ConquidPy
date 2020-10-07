@@ -1,5 +1,5 @@
 # ConquidPy
-A Python port of a grid-based game created by Pqvqn
+A Python port in Tkinter of a grid-based game created by @Pqvqn
 
 ## Controls
 ## Game Customization
