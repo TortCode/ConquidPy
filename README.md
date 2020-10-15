@@ -27,7 +27,13 @@ When a game is finished, only playback mode is allowed.
 See next board state.
 
 ## Game Customization
+### Board Layout
+Click on File >> New, and you will be prompted to enter the dimensions of your board(row and column) and the size of your bases.
+### Colors
+Click on Colors, and a menu will open that allows you to choose the base color and cell color for each player.
 ## Saving and Loading Files
+Click on File >> Save to save the latest copy of your game as a json file.
+Click on File >> Load to open up a saved game and continue or playback.
 
 # Rules
 ## Objective
