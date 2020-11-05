@@ -1,9 +1,39 @@
 # ConquidPy
-A Python port of a grid-based game created by Pqvqn
+A Python port in Tkinter of a grid-based game created by @Pqvqn
 
 ## Controls
+### Gameplay Controls
+#### Acquire \<A>
+Allows you to select and deselect cells to acquire
+and preview an acquire move.
+#### Conquer \<C>
+Previews a conquer move.
+#### Vanquish \<V>
+Allows you to select the top-left corner of the vanquish block
+and preview a vanquish move.
+#### Conquest \<Q>
+Preview a conquest move if possible.
+#### Undo \<U>
+Reset the prior move buttons to allow you to switch your type of move.
+#### Confirm \<Return>
+Confirm the move entered in and advance to next player.
+### Playback Controls
+#### Previous(<<) \<LArrow>
+See previous board state.
+#### Play/Pause \<UArrow>
+Switches between gameplay and playback mode when no moves are selected.
+When a game is finished, only playback mode is allowed.
+#### Next(>>) \<RArrow>
+See next board state.
+
 ## Game Customization
+### Board Layout
+Click on File >> New, and you will be prompted to enter the dimensions of your board(row and column) and the size of your bases.
+### Colors
+Click on Colors, and a menu will open that allows you to choose the base color and cell color for each player.
 ## Saving and Loading Files
+Click on File >> Save to save the latest copy of your game as a json file.
+Click on File >> Load to open up a saved game and continue or playback.
 
 # Rules
 ## Objective
@@ -55,6 +85,8 @@ A cell is *adjacent* to another cell if they share an edge. Since cells that tou
 A cell is said to *surround* a 4 by 4 block if it is *adjacent* to a cell within the block, but is not itself within the block.
 ##### Path
 A *path* of cells is a list of cells where each cell is *adjacent* to the cell that comes directly before and the cell that comes directly after it.
+#### Unplayability of Bases
+No cell contained within a base is considered valid for the purposes of conquering enemy cells, forming part of a vanquish block, or surrounding a vanquish block.
 ## Winning
 The first player to perform a Conquest wins the game and ends the match.
 Ceremonially, one of the winning paths of the winning player will be colored with that player's base color.
