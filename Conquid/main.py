@@ -27,9 +27,7 @@ def opencmd():
     load_history(History(**histdict))
 
 def load_history(history):
-    global cache
     cache = Cache(history)
-    controller.cache = cache
     board = cache.latest
     root.geometry(str(max(board.cols*40,800))+'x'+str(board.rows*40)+'+400+200')
     bdv.setup(controller, board.rows, board.cols)
@@ -41,7 +39,7 @@ def set_color(player, base=False):
         bdv.basecolors[player] = color
     else:
         bdv.colors[player] = color
-    bdv.set_view(cache.latest)
+    bdv.set_view(controller.cache.latest)
 
 root = tk.Tk()
 root.title("Conquid")
@@ -68,7 +66,6 @@ turn_box = tk.Label(button_frame,text='PLAYER 1 TURN', width=15)
 bdv = BoardView(root, turn_box)
 controller = Controller()
 controller.boardview = bdv
-load_history(History(14, 28, 2))
 
 #move buttons
 move_btns = {}
@@ -108,5 +105,6 @@ prev_btn.grid(row=0, column=7)
 pause_play.grid(row=0,column=8)
 next_btn.grid(row=0, column=9)
 #rev it up
+load_history(History(14, 28, 2))
 root.focus()
 root.mainloop()

@@ -33,6 +33,10 @@ class Controller:
         self.next_btn = next
         self.set_state('MOVE_BLANK')     
 
+    def load_cache(self, cache):
+        self.cache = cache
+        self.set_state('HIST' if cache.hist.is_finished() else 'MOVE_BLANK')
+
     @in_state('MOVE_BLANK')
     def button_pressed(self, action):
         if self.handlers[action].propose():

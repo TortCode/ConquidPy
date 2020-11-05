@@ -67,6 +67,7 @@ class Cache:
     def link_gui(self, controller: 'Controller', boardview: 'Boardview'):
         self.controller = controller
         self.boardview = boardview
+        controller.load_cache(self)
         boardview.set_view(self.latest)
         self.send_turn_status()
 
@@ -98,7 +99,7 @@ class Cache:
         self.send_turn_status()
 
     def receive(self, move: Move):
-        if self.move:
+        if self.move or self.hist.is_finished():
             return
         self.latest = move(self.latest, validate=True)
         self.boardview.set_view(self.latest)
