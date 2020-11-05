@@ -17,7 +17,7 @@ def newcmd():
 def saveascmd():
     save_file = filedialog.asksaveasfilename()
     with open(save_file, 'w') as sf:
-        json.dump(cache.hist.__dict__, sf)
+        json.dump(controller.cache.hist.__dict__, sf)
 #open saved game
 def opencmd():
     open_file = filedialog.askopenfilename()
