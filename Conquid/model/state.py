@@ -220,7 +220,7 @@ class Move:
             func = partial(b.vanquish, validate=validate)
         if self.type == 'Q':
             func = b.conquest
-        func(**{k:v for k,v in self.__dict__.items() if k != 'type'})
+        func(player=self.player, locs=self.locs, corner=self.corner)
         return b
 
 class InvalidMove(Exception):

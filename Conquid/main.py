@@ -41,6 +41,7 @@ def set_color(player, base=False):
         bdv.colors[player] = color
     bdv.set_view(controller.cache.latest)
 
+
 root = tk.Tk()
 root.title("Conquid")
 root.option_add('*tearOff', False)
