@@ -2,7 +2,6 @@ import math
 from collections import deque
 from heapq import heappush, heappop
 from typing import Tuple
-from functools import partial
 Position = Tuple[int,int]
 
 class Cell:
@@ -15,15 +14,15 @@ class Cell:
     base = False if its a normal gameplay cell or it is the center of the base
     base = True if its in the 8 cell ring of the base surrounding the center
     """
-    def __init__(self, player=0, base=False):
+    def __init__(self, player: int = 0, base: bool =False):
         self.player = player
         self.base = base
 
-    def set_base(self, player):
+    def set_base(self, player: int):
         self.player = player
         self.base = True
 
-    def copy(self):
+    def copy(self) -> 'Cell':
         return Cell(**self.__dict__)
 
 class Board:
@@ -47,7 +46,7 @@ class Board:
                          (0,-1), (1,-1), (2,-1), (3,-1),
                          (0,4), (1,4), (2,4), (3,4)]
 
-    def __init__(self, r, c, base_size):
+    def __init__(self, r: int, c: int, base_size: int):
         self.rows = r
         self.cols = c
         self.grid = [[Cell() for j in range(c)] for i in range(r)]
@@ -70,7 +69,7 @@ class Board:
             for dx, dy in Board.base_offsets2x2:
                 self[corner[0] + dx, corner[1] + dy].set_base(player)
 
-    def copy(self):
+    def copy(self) -> 'Board':
         cpy = Board(self.rows, self.cols, self.base_size)
         for i in range(self.rows):
             for j in range(self.cols):
@@ -80,20 +79,20 @@ class Board:
     def __getitem__(self, pos: Position) -> Cell:
         return self.grid[pos[0]][pos[1]]
 
-    def __setitem__(self, pos: Position, value):
+    def __setitem__(self, pos: Position, value: Cell):
         self.grid[pos[0]][pos[1]] = value
 
     def is_valid_position(self, pos: Position):
         return pos[0] >= 0 and pos[0] < self.rows and pos[1] >= 0 and pos[1] < self.cols
 
-    def adjacent(self, center: Position, base=False):
+    def adjacent(self, center: Position, base: bool = False):
         for dx, dy in Board.adjacent_offsets:
             loc = (center[0] + dx, center[1] + dy)
             if self.is_valid_position(loc):
                 if base or not self[loc].base:
                     yield loc
 
-    def acquire(self, player, locs: [Position], validate=False):
+    def acquire(self, player: int, locs: [Position], validate: bool = False):
         if validate:
             for loc in locs:
                 if self[loc].player != 0:
@@ -101,7 +100,7 @@ class Board:
         for loc in locs:
             self[loc].player = player
 
-    def conquer(self, player):
+    def conquer(self, player: int):
         enemy = 3 - player
         # player cells that touch enemy cell
         touching = [[0 for j in range(self.cols)] for i in range(self.rows)]
@@ -121,7 +120,7 @@ class Board:
                         self[i, j].player = player
                         q.append((i,j))
 
-    def vanquish(self, player, corner: Position, validate=False):
+    def vanquish(self, player: int, corner: Position, validate: bool = False):
         #check that player surrounds square
         if validate:
             surrounding = 0
@@ -148,7 +147,7 @@ class Board:
         for sq in square:
             sq.player = 0
 
-    def conquest(self, player):
+    def conquest(self, player: int):
         enemy = 3-player
         # distance to player base
         dist = [[math.inf for j in range(self.cols)] for i in range(self.rows)]
@@ -202,7 +201,7 @@ class Move:
         player is 1 or 2
         position is a pair of ints
     """
-    def __init__(self, type, player, locs=None, corner=None):
+    def __init__(self, type: str, player: int, locs: [Position] = None, corner: Position = None):
         self.type = type
         self.player = player
         if type == 'A':
@@ -213,14 +212,13 @@ class Move:
     def __call__(self, board: Board, *, validate=False):
         b = board.copy()
         if self.type == 'A':
-            func = partial(b.acquire, validate=validate)
-        if self.type == 'C':
-            func = b.conquer
-        if self.type == 'V':
-            func = partial(b.vanquish, validate=validate)
-        if self.type == 'Q':
-            func = b.conquest
-        func(player=self.player, locs=self.locs, corner=self.corner)
+            b.acquire(self.player, self.locs, validate=validate)
+        elif self.type == 'C':
+            b.conquer(self.player)
+        elif self.type == 'V':
+            b.vanquish(self.player, self.corner, validate=validate)
+        elif self.type == 'Q':
+            b.conquest(self.player)
         return b
 
 class InvalidMove(Exception):

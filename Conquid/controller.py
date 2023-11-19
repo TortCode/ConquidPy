@@ -1,8 +1,8 @@
-from model.memory import *
-from model.state import *
-from boardview import BoardView
+from model.memory import Cache
+from model.state import Move, InvalidMove
 from tkinter import messagebox
 from functools import wraps
+
 
 def in_state(*states):
     def decorator(func):
@@ -13,6 +13,7 @@ def in_state(*states):
         return newfunc
     return decorator
 
+
 class Controller:
 
     def __init__(self):
@@ -22,7 +23,7 @@ class Controller:
         self.handlers['V'] = VanquishHandler(self)
         self.handlers['Q'] = ConquestHandler(self)
         self.cache = None
-        self.boardview = None
+        self.boardview: 'BoardView' = None
 
     def link_buttons(self, move_btns, undo, confirm, prev, pause_play, next):
         self.move_btns = move_btns
@@ -31,9 +32,9 @@ class Controller:
         self.prev_btn = prev
         self.pauseplay_btn = pause_play
         self.next_btn = next
-        self.set_state('MOVE_BLANK')     
+        self.set_state('MOVE_BLANK')
 
-    def load_cache(self, cache):
+    def load_cache(self, cache: Cache):
         self.cache = cache
         self.set_state('HIST' if cache.hist.is_finished() else 'MOVE_BLANK')
 
@@ -41,7 +42,7 @@ class Controller:
     def button_pressed(self, action):
         if self.handlers[action].propose():
             self.move_attempt = action
-    
+
     @in_state('MOVE_START', 'MOVE_END')
     def tile_click(self, loc):
         self.handlers[self.move_attempt].handle(loc)
@@ -55,7 +56,7 @@ class Controller:
         """Reverts move and deselects move type"""
         self.cache.discard_change()
         self.set_state('MOVE_BLANK')
-        
+
     def revoke(self):
         """Reverts move but keeps move type"""
         self.cache.discard_change()
@@ -63,15 +64,18 @@ class Controller:
 
     def pauseplay(self):
         if self.state == 'HIST' and \
-            self.cache.at_last_state(finish_allowed=False):
+                self.cache.at_last_state(finish_allowed=False):
             self.set_state('MOVE_BLANK')
         elif self.state == 'MOVE_BLANK':
             self.set_state('HIST')
 
     def check_prevnext(self):
-        self.prev_btn['state'] = 'disabled' if self.cache.at_first_state() else 'normal'
-        self.next_btn['state'] = 'disabled' if self.cache.at_last_state() else 'normal'
-        self.pauseplay_btn['state'] = 'normal' if self.cache.at_last_state(finish_allowed=False) else 'disabled'
+        def disable_button_if(button, cond):
+            button['state'] = 'disabled' if cond else 'normal'
+        disable_button_if(self.prev_btn, self.cache.at_first_state())
+        disable_button_if(self.next_btn, self.cache.at_last_state())
+        disable_button_if(self.pauseplay_btn,
+                          self.cache.at_last_state(finish_allowed=False))
 
     @in_state('HIST')
     def next_board(self):
@@ -85,7 +89,8 @@ class Controller:
 
     def game_won(self):
         self.set_state('HIST')
-        messagebox.showinfo(message= f'PLAYER {3 - self.cache.current_player} WINS!')
+        messagebox.showinfo(
+            message=f"PLAYER {3 - self.cache.current_player} WINS!")
         self.pauseplay_btn['state'] = 'disabled'
 
     def set_state(self, state: str):
@@ -117,7 +122,7 @@ class Controller:
         else:
             self.pauseplay_btn['state'] = 'normal'
             self.undo_btn['state'] = 'disabled'
-            self.confirm_btn['state'] = 'disabled' 
+            self.confirm_btn['state'] = 'disabled'
 
     def exit_limbo(self):
         for btn in self.move_btns.values():
@@ -126,7 +131,6 @@ class Controller:
         self.undo_btn['state'] = 'disabled'
         self.confirm_btn['state'] = 'disabled'
 
-    
 
 class AcquireHandler:
 
@@ -155,24 +159,29 @@ class AcquireHandler:
                 self.controller.cache.receive(Move('A', ply, locs=self.locs))
                 self.controller.set_state('MOVE_END')
 
+
 class ConquerHandler:
 
     def __init__(self, controller: Controller):
         self.controller = controller
 
     def propose(self):
-        self.controller.cache.receive(Move('C', self.controller.cache.current_player))
+        self.controller.cache.receive(
+            Move('C', self.controller.cache.current_player))
         self.controller.set_state('MOVE_END')
         return True
-    #null
+
+    # null
     def handle(self, loc):
         pass
+
 
 class VanquishHandler:
 
     def __init__(self, controller: Controller):
         self.controller = controller
-    #null
+
+    # null
     def propose(self):
         self.controller.set_state('MOVE_START')
         return True
@@ -181,10 +190,12 @@ class VanquishHandler:
         self.controller.revoke()
         # send command
         try:
-            self.controller.cache.receive(Move('V', self.controller.cache.current_player, corner=corner))
+            self.controller.cache.receive(
+                Move('V', self.controller.cache.current_player, corner=corner))
             self.controller.set_state('MOVE_END')
         except InvalidMove:
             pass
+
 
 class ConquestHandler:
 
@@ -193,11 +204,13 @@ class ConquestHandler:
 
     def propose(self):
         try:
-            self.controller.cache.receive(Move('Q', self.controller.cache.current_player))
+            self.controller.cache.receive(
+                Move('Q', self.controller.cache.current_player))
         except InvalidMove:
             return False
         self.controller.set_state('MOVE_END')
         return True
-    #null
+
+    # null
     def handle(self, loc):
         pass

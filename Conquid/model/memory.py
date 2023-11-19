@@ -1,5 +1,4 @@
 from model.state import *
-from itertools import accumulate
 
 class History:
     """
@@ -12,22 +11,22 @@ class History:
     ***Remember, if a board is the (i)th state in the board history,
     then the last move done is the (i-1)th action in the move history
     """
-    def __init__(self, rows, cols, base_size, moves=None):
+    def __init__(self, rows: int, cols: int, base_size: int, moves=None):
         self.rows = rows
         self.cols = cols
         self.base_size = base_size
         self.moves = moves if moves else []
 
-    def store(self, move):
+    def store(self, move: Move):
         self.moves.append(move.__dict__)
 
-    def is_finished(self):
+    def is_finished(self) -> bool:
         return self.moves and self.moves[-1]['type'] == 'Q'
 
-    def move_history(self):
+    def move_history(self) -> [Move]:
         return [Move(**mv) for mv in self.moves]
 
-    def board_history(self):
+    def board_history(self) -> [Board]:
         # starting state
         boards = [Board(self.rows, self.cols, self.base_size)]
         for mv in self.moves:
@@ -71,11 +70,11 @@ class Cache:
         boardview.set_view(self.latest)
         self.send_turn_status()
 
-    def at_last_state(self, finish_allowed=True):
+    def at_last_state(self, finish_allowed: bool = True) -> bool:
         return self.nstate == len(self.save)-1 and \
             (finish_allowed or not self.hist.is_finished())
 
-    def at_first_state(self):
+    def at_first_state(self) -> bool:
         return self.nstate == 0
 
     def send_turn_status(self):
